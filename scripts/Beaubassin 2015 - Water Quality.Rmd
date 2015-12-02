@@ -1,0 +1,381 @@
+Basic Plots 
+September 2015
+========================================================
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+#na.strings="" used to replace blank entry with NA
+#stringAsFactors --> strings in data are converted to factors
+#factor --> whole numbers (integers)
+Beaubassin.Data <- read.csv("~/Documents/Master's/Data/Loder R data water quality 2015.csv", na.strings="NI", stringsAsFactors = FALSE)
+Groundwater.Beaubassin <- read.csv("~/Documents/Master's/Data/CMR Groundwater Survey 2015.csv", na.strings="ND", stringsAsFactors = FALSE)
+Weather.Data <- read.csv("~/Documents/Master's/Data/2015 Weather.csv", na.strings="NI", stringsAsFactors = FALSE)
+Weather.Data <- select(Weather.Data, -Notes)
+Beaubassin.Data$TN[Beaubassin.Data$TN == "ND"] <- "0"
+Beaubassin.Data$TN[Beaubassin.Data$TN == "<0.5"] <- "0"
+Beaubassin.Data$Pipe[Beaubassin.Data$Pipe == "*draining"] <- "NA"
+Beaubassin.Data$Age[Beaubassin.Data$Age == "0.25"] <- "New"
+Beaubassin.Data$Age[Beaubassin.Data$Age == "30"] <- "Old"
+Beaubassin.Data$Age[Beaubassin.Data$Age == "44"] <- "Old"
+Beaubassin.Data$Age[Beaubassin.Data$Age == "42"] <- "Old"
+Beaubassin.Data$Age[Beaubassin.Data$Age == "NA"] <- "Old"
+Beaubassin.Data$Marsh[Beaubassin.Data$Marsh == "M"] <- "Missaquash"
+Beaubassin.Data$Marsh[Beaubassin.Data$Marsh == "A"] <- "Amherst"
+Beaubassin.Data$TN.TP[Beaubassin.Data$TN.TP == "#VALUE!"] <- "NA"
+Beaubassin.Data <- 
+  Beaubassin.Data %>%
+  subset(Site!="A4") %>%
+  select(-TPO4) 
+
+#Making sure columns are the proper class
+class(Beaubassin.Data$TP)
+class(Beaubassin.Data$Secchi)
+Beaubassin.Data$Age <- as.character(Beaubassin.Data$Age)
+Beaubassin.Data$Goal <- as.character(Beaubassin.Data$Goal)
+Beaubassin.Data$TP <- as.numeric(Beaubassin.Data$TP) 
+Beaubassin.Data$TN <- as.numeric(Beaubassin.Data$TN) 
+Beaubassin.Data$pH <- as.numeric(Beaubassin.Data$pH) 
+Beaubassin.Data$Week <- as.numeric(Beaubassin.Data$Week) 
+Beaubassin.Data$Secchi <- as.numeric(Beaubassin.Data$Secchi)
+Beaubassin.Data$TN.TP <- as.numeric(Beaubassin.Data$TN.TP)
+
+#Dividing into various datasets 
+New.impoundments <- subset(Beaubassin.Data, Age=="New")
+Old.impoundments <- subset(Beaubassin.Data, Age=="Old")
+Missaquash <- subset(Beaubassin.Data, Marsh=="Missaquash")
+Amherst <- 
+  Beaubassin.Data %>%
+  filter(Marsh == "Amherst") %>%
+  select(-Pipe, -Goal, -Secchi) 
+B1 <- subset(Beaubassin.Data, Site == "B1")
+B2 <- subset(Beaubassin.Data, Site == "B2")
+B3 <- subset(Beaubassin.Data, Site == "B3")
+B4 <- subset(Beaubassin.Data, Site == "B4")
+B5 <- subset(Beaubassin.Data, Site == "B5")
+B6 <- subset(Beaubassin.Data, Site == "B6")
+B7 <- subset(Beaubassin.Data, Site == "B7")
+A1 <- subset(Amherst, Site == "A1")
+A2 <- subset(Amherst, Site == "A2")
+A3 <- subset(Amherst, Site == "A3")
+M1 <- subset(Beaubassin.Data, Site == "M1")
+
+#Appendices 
+B1.appendix <- select(B1, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B1.appendix 
+B2.appendix <- select(B2, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B2.appendix
+B3.appendix <- select(B3, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B3.appendix
+B4.appendix <- select(B4, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B4.appendix 
+B5.appendix <- select(B5, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B5.appendix 
+B6.appendix <- select(B6, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B6.appendix 
+B7.appendix <- select(B7, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+B7.appendix
+M1.appendix <- select(M1, Week, pH, DOmg.L, Conductivity, Temperature, Secchi, TN, TP)
+M1.appendix
+A1.appendix <- select(A1, Week, pH, DOmg.L, Conductivity, Temperature, TN, TP)
+A1.appendix
+A2.appendix <- select(A2, Week, pH, DOmg.L, Conductivity, Temperature, TN, TP)
+A2.appendix
+A3.appendix <- select(A3, Week, pH, DOmg.L, Conductivity, Temperature, TN, TP)
+A3.appendix
+
+
+#Total phosphorus all sites 
+Box.Site.TP <- ggplot(Beaubassin.Data, aes(x=Site, y=TP, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TP (mg/L)") 
+Box.Site.TP
+#Total nitrogen all sites
+Box.Site.TN <- ggplot(Beaubassin.Data, aes(x=Site, y=TN, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TN (mg/L)") 
+Box.Site.TN
+#Total Phosphorus Missaquash ***
+Box.Miss.TP <- ggplot(Missaquash, aes(x=Site, y=TP, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TP (mg/L)") 
+Box.Miss.TP
+#Total Nitrogen Missaquash ***
+Box.Site.TN <- ggplot(Missaquash, aes(x=Site, y=TN, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TN (mg/L)")
+Box.Site.TN
+#Total Phosphorus Old Sites - B7 more phosphorus, not associated with land practices
+Box.Old.Site.TP <- ggplot(Old.impoundments, aes(x=Site, y=TP, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TP (mg/L)") 
+Box.Old.Site.TP
+#Total Nitrogen Old Sites --> B7 only site completely dyked? 
+Box.Old.Site.TN <- ggplot(Old.impoundments, aes(x=Site, y=TN, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TN (mg/L)") 
+Box.Old.Site.TN
+#Dealing with outliers --> Total Nitrogen Old Sites - Perhaps M1 has greater TN range due to groundwater input/agriculture influence 
+Old.impoundments.nitrogen2 <- subset(Old.impoundments, TN < 4)
+Box.Old.Site.TN2 <- ggplot(Old.impoundments.nitrogen2, aes(x=Site, y=TN, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TN (mg/L)") 
+Box.Old.Site.TN2
+
+#Dissolved Oxygen All Sites
+Box.Site.DO <- ggplot(Beaubassin.Data, aes(x=Site, y=DO, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("DO (mg/L)") 
+Box.Site.DO
+#Dissolved Oxygen Missaquash ***
+Box.Missaquash.Site.DO <- ggplot(Missaquash, aes(x=Site, y=DO, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("DO (mg/L)") 
+Box.Missaquash.Site.DO
+#Dissolved Oxygen Old Sites 
+Box.Old.Site.DO <- ggplot(Old.impoundments, aes(x=Site, y=DO, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("DO (mg/L)") 
+Box.Old.Site.DO
+#pH all sites with outliers 
+Box.Site.pH <- ggplot(Beaubassin.Data, aes(x=Site, y=pH, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH") 
+Box.Site.pH
+#pH Missaquash with Outliers 
+Box.Missaquash.Site.pH <- ggplot(Missaquash, aes(x=Site, y=pH, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH") 
+Box.Missaquash.Site.pH
+#pH Old site with Outliers 
+Box.Old.Site.pH <- ggplot(Old.impoundments, aes(x=Site, y=pH, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH") 
+Box.Old.Site.pH
+#Dealing with outliers pH
+Old.impoundments$Week <- as.numeric(Old.impoundments$Week) 
+Old.impoundments.pH2 <- subset(Old.impoundments, Week > 1)
+Box.Old.Site.pH2 <- ggplot(Old.impoundments.pH2, aes(x=Site, y=pH, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH") 
+Box.Old.Site.pH2
+Missaquash.pH <- subset(Missaquash, Week > 1)
+Box.M.Site.pH2 <- ggplot(Missaquash.pH, aes(x=Site, y=pH, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH") 
+Box.M.Site.pH2
+Beaubassin.pH2 <- subset(Beaubassin.Data, Week > 1)
+Box.Beaubassin.pH2 <- ggplot(Beaubassin.pH2, aes(x=Site, y=pH, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH") 
+Box.Beaubassin.pH2
+#Conductivity all sites 
+Box.Site.Conductivity <- ggplot(Beaubassin.Data, aes(x=Site, y=Conductivity, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("Conductivity (uS/cm)") 
+Box.Site.Conductivity
+#Conductivity Missaquash ***
+Box.Missaquash.Site.Conductivity <- ggplot(Missaquash, aes(x=Site, y=Conductivity, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("Conductivity (uS/cm)") 
+Box.Missaquash.Site.Conductivity
+#Conductivity Old Sites
+Box.Old.Site.Conductivity <- ggplot(Old.impoundments, aes(x=Site, y=Conductivity, fill=Marsh), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("Conductivity (uS/cm)") 
+Box.Old.Site.Conductivity
+#Temperature all sites  - compare to DO
+#Appears A1 and A3 warmer and have more DO. Possibly warmer to sustain more growth, thus more photosynthesis?
+Box.Site.Temperature <- ggplot(Beaubassin.Data, aes(x=Site, y=Temperature, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("Temperature (Celsius)") 
+Box.Site.Temperature
+Box.Site.DO <- ggplot(Beaubassin.Data, aes(x=Site, y=DO, fill=Age), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("DO (mg/L)") 
+Box.Site.DO
+grid.arrange(Box.Site.Temperature, Box.Site.DO, nrow=2)
+
+#Seasonal trends Total Phosphorus and Secchi depths ***
+#6)
+Scatter.TP.B2 <- ggplot(B2, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") + geom_smooth()
+Scatter.TP.B2
+Scatter.Secchi.B2 <- ggplot(B2, aes(x=Week, y=Secchi), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week", size=18) + ylab("Secchi Depth") + geom_point(shape=1) + geom_smooth()
+Scatter.Secchi.B2
+grid.arrange(Scatter.TP.B2, Scatter.Secchi.B2, nrow=2)
+Scatter.TP.B3 <- ggplot(B3, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) +xlab("Week") + ylab("TP") + geom_smooth()
+Scatter.TP.B3
+Scatter.Secchi.B3 <- ggplot(B3, aes(x=Week, y=Secchi), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Secchi Depth") + geom_smooth()
+Scatter.Secchi.B3
+grid.arrange(Scatter.TP.B3, Scatter.Secchi.B3, nrow=2)
+Scatter.TP.B4 <- ggplot(B4, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") + geom_smooth()
+Scatter.TP.B4
+Scatter.Secchi.B4 <- ggplot(B4, aes(x=Week, y=Secchi), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Secchi Depth") + geom_smooth()
+Scatter.Secchi.B4
+grid.arrange(Scatter.TP.B4, Scatter.Secchi.B4, nrow=2)
+Scatter.TP.B5 <- ggplot(B5, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) +xlab("Week") + ylab("TP") + geom_smooth()
+Scatter.TP.B5
+Scatter.Secchi.B5 <- ggplot(B5, aes(x=Week, y=Secchi), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Secchi Depth") + geom_smooth()
+Scatter.Secchi.B5
+grid.arrange(Scatter.TP.B5, Scatter.Secchi.B5, nrow=2)
+Scatter.TP.B7 <- ggplot(B7, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) +xlab("Week") + ylab("TP") + geom_smooth()
+Scatter.TP.B7
+Scatter.TP.M1 <- ggplot(M1, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") + geom_smooth()
+Scatter.TP.M1
+Scatter.Secchi.M1 <- ggplot(M1, aes(x=Week, y=Secchi), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Secchi Depth") + geom_smooth()
+Scatter.Secchi.M1
+grid.arrange(Scatter.TP.M1, Scatter.Secchi.M1, nrow=2)
+
+#TP Amherst scattered
+Scatter.TP.A1 <- ggplot(A1, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.A1
+Scatter.TP.A2 <- ggplot(A2, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.A2
+Scatter.TP.A3 <- ggplot(A3, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.A3
+grid.arrange(Scatter.TP.A1, Scatter.TP.A2, Scatter.TP.A3, nrow=3)
+
+Scatter.TN.A1 <- ggplot(A1, aes(x=Week, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TN") 
+Scatter.TN.A1
+Scatter.TN.A2 <- ggplot(A2, aes(x=Week, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TN") 
+Scatter.TN.A2
+Scatter.TN.A3 <- ggplot(A3, aes(x=Week, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TN") 
+Scatter.TN.A3
+grid.arrange(Scatter.TN.A1, Scatter.TN.A2, Scatter.TN.A3, nrow=3)
+
+Scatter.TP.M1 <- ggplot(M1, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.M1
+Scatter.TP.B7 <- ggplot(B7, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.B7
+grid.arrange(Scatter.TP.M1, Scatter.TP.B7, nrow=3)
+
+Scatter.TN.M1 <- ggplot(M1, aes(x=Week, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TN") 
+Scatter.TN.M1
+Scatter.TN.B7 <- ggplot(B7, aes(x=Week, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TN") 
+Scatter.TN.B7
+grid.arrange(Scatter.TN.M1, Scatter.TN.B7, nrow=3)
+
+#pH vs. DO vs. Conductivity vs. TP vs. TN trends - none obvious 
+Scatter.pH.DO <- ggplot(Beaubassin.Data, aes(x=pH, y=DO), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("pH") + ylab("DO") 
+Scatter.pH.DO
+Scatter.pH.Conductivity <- ggplot(Beaubassin.Data, aes(x=pH, y=Conductivity), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("pH") + ylab("Conductivity") 
+Scatter.pH.Conductivity
+Scatter.DO.Conductivity <- ggplot(Beaubassin.Data, aes(x=Conductivity, y=DO), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("pH") + ylab("DO") 
+Scatter.DO.Conductivity
+Scatter.TN.pH <- ggplot(Beaubassin.Data, aes(x=pH, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("pH") + ylab("DO") 
+Scatter.TN.pH
+Scatter.TP.pH <- ggplot(Beaubassin.Data, aes(x=pH, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("pH") + ylab("TP") 
+Scatter.TP.pH
+Scatter.TP.DO <- ggplot(Beaubassin.Data, aes(x=DO, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("pH") + ylab("TP") 
+Scatter.TP.DO
+Scatter.TN.DO <- ggplot(Beaubassin.Data, aes(x=DO, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("DO") + ylab("TN") 
+Scatter.TN.DO
+Scatter.TP.Conductivity <- ggplot(Beaubassin.Data, aes(x=Conductivity, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Conductivity") + ylab("TP") 
+Scatter.TP.Conductivity
+Scatter.TN.Conductivity <- ggplot(Beaubassin.Data, aes(x=Conductivity, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Conductivity") + ylab("TN") 
+Scatter.TN.Conductivity
+
+
+#B1 and B6 pH graphs - interesting increase over the summmer ..... 
+#B5 pH also increases in latter weeks
+Scatter.B1.pH <- ggplot(B1, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.B1.pH
+Scatter.B6.pH <- ggplot(B6, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.B6.pH
+Scatter.B5.pH <- ggplot(B5.pH, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.B5.pH
+B3.pH <- subset(B3, Week > 1)
+Scatter.B3.pH <- ggplot(B3.pH, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.B3.pH
+Scatter.B4.pH <- ggplot(B4.pH, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.B4.pH
+
+#Interesting how B5 and B6 conductivities follow similar patterns
+Scatter.B5.Conductivity <- ggplot(B5, aes(Week, Conductivity), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("Conductivity") + facet_wrap( ~ Site)
+Scatter.B5.Conductivity
+Scatter.B6.Conductivity <- ggplot(B6, aes(Week, Conductivity), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("Conductivity") + facet_wrap( ~ Site)
+Scatter.B6.Conductivity
+Scatter.B2.Conductivity <- ggplot(B2, aes(Week, Conductivity), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("Conductivity") + facet_wrap( ~ Site)
+Scatter.B2.Conductivity
+Scatter.B1.Conductivity <- ggplot(B1, aes(Week, Conductivity), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("Conductivity") + facet_wrap( ~ Site)
+Scatter.B1.Conductivity
+grid.arrange(Scatter.B5.Conductivity, Scatter.B6.Conductivity, nrow=2)
+grid.arrange(Scatter.B1.Conductivity, Scatter.B2.Conductivity, nrow=2)
+
+#Decrease in pH at sites M1 and B7
+Scatter.pH.M1 <- ggplot(M1, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.pH.M1
+Scatter.pH.B7 <- ggplot(B7, aes(Week, pH), na.rm=TRUE) + geom_point(na.rm=TRUE, size = 4) + xlab("Week") + ylab("pH") + facet_wrap( ~ Site)
+Scatter.pH.B7
+grid.arrange(Scatter.pH.M1, Scatter.pH.B7, nrow=2)
+
+#Temperature trends follow phosphorus trends in sites B2-4, however not B5 (doing something different ....), possible match in B7
+Scatter.TP.B2 <- ggplot(B2, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.B2
+Scatter.Temperature.B2 <- ggplot(B2, aes(x=Week, y=Temperature), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Temperature") 
+Scatter.Temperature.B2
+grid.arrange(Scatter.TP.B2, Scatter.Temperature.B2, nrow=2)
+Scatter.TP.B3 <- ggplot(B3, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.B3
+Scatter.Temperature.B3 <- ggplot(B3, aes(x=Week, y=Temperature), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Temperature") 
+Scatter.Temperature.B3
+grid.arrange(Scatter.TP.B3, Scatter.Temperature.B3, nrow=2)
+Scatter.TP.B4 <- ggplot(B4, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.B4
+Scatter.Temperature.B4 <- ggplot(B4, aes(x=Week, y=Temperature), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Temperature") 
+Scatter.Temperature.B4
+grid.arrange(Scatter.TP.B4, Scatter.Temperature.B4, nrow=2)
+Scatter.TP.B5 <- ggplot(B5, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.B5
+Scatter.Temperature.B5 <- ggplot(B5, aes(x=Week, y=Temperature), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Temperature") 
+Scatter.Temperature.B5
+grid.arrange(Scatter.TP.B5, Scatter.Temperature.B5, nrow=2)
+Scatter.TP.B7 <- ggplot(B7, aes(x=Week, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("TP") 
+Scatter.TP.B7
+Scatter.Temperature.B7 <- ggplot(B7, aes(x=Week, y=Temperature), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Week") + ylab("Temperature") 
+Scatter.Temperature.B7
+grid.arrange(Scatter.TP.B7, Scatter.Temperature.B7, nrow=2)
+
+
+#Levels - note increase after rainfall event during week 4
+Scatter.Missaquash.Levels <- ggplot(Missaquash, aes(x=Week, y=Level), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) + xlab("Week") + ylab("Level") + facet_wrap("Site")
+Scatter.Missaquash.Levels
+Scatter.Amherst.Levels <- ggplot(Amherst, aes(x=Week, y=Level), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) + xlab("Week") + ylab("Level") + facet_wrap("Site")
+Scatter.Amherst.Levels
+
+#New impoundments --> division according to water level goal 
+Beaubassin.Data$Goal <- as.character(Beaubassin.Data$Goal) 
+Box.Site.TP <- ggplot(New.impoundments, aes(x=Site, y=TP, fill=Goal), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TP (mg/L)") 
+Box.Site.TP
+Box.Site.TN <- ggplot(New.impoundments, aes(x=Site, y=TN, fill=Goal), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("TN (mg/L)")
+Box.Site.TN
+Box.Missaquash.Site.DO <- ggplot(Missaquash, aes(x=Site, y=DO, fill=Goal), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("DO (mg/L)") 
+Box.Missaquash.Site.DO
+Box.Missaquash.Site.pH <- ggplot(Missaquash, aes(x=Site, y=pH, fill=Goal), na.rm=TRUE) + geom_boxplot(na.rm=TRUE) +xlab("Site") + ylab("pH")
+Box.Missaquash.Site.pH
+
+#Groundwater
+Scatter.Groundwater.TN <- ggplot(Groundwater.Beaubassin, aes(x=Location, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("TN (mg/L)")
+Scatter.Groundwater.TN
+Scatter.Groundwater.TP <- ggplot(Groundwater.Beaubassin, aes(x=Location, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("TP (mg/L)")
+Scatter.Groundwater.TP
+
+#TN/TP Ratios 
+Scatter.TN.TP <- ggplot(Beaubassin.Data, aes(x=Site, y=TN.TP), na.rm=TRUE) + geom_point(na.rm=TRUE) +xlab("Site") + ylab("TN/TP") 
+Scatter.TN.TP
+```
+
+You can also embed plots, for example:
+
+```{r}
+#Model for new sites 
+TP.New.Model <- glm(TP ~ Temperature+Site+Secchi, data = New.impoundments)  
+summary(TP.New.Model)
+plot(TP.New.Model) 
+resid.new.TP <- residuals(TP.New.Model, type="response")
+hist(resid.new.TP)
+
+Secchi.New.Model <- glm(Secchi ~ Site+TP+Temperature+Week, data = New.impoundments)  
+summary(Secchi.New.Model)
+plot(Secchi.New.Model) 
+resid.new.secchi <- residuals(Secchi.New.Model, type="response")
+hist(resid.new.secchi)
+
+Conductivity.New.Model <- glm(Conductivity ~ Site+pH+Week+Temperature, data = New.impoundments)  
+summary(Conductivity.New.Model)
+plot(Conductivity.New.Model) 
+Resid.Conductivity.New <- residuals(Conductivity.New.Model, type="response")
+hist(Resid.Conductivity.New)
+
+DO.Miss.Model <- glm(DO ~ Conductivity+Temperature+Week+TP+Age+Site, data = Missaquash)  
+summary(DO.Miss.Model)
+plot(DO.Miss.Model) 
+Resid.DO.Miss <- residuals(DO.Miss.Model, type="response")
+hist(Resid.DO.Miss)
+
+Conductivity.Miss.Model <- glm(Conductivity ~ DO+Temperature+Week+Age+Site+pH, data = Missaquash)  
+summary(Conductivity.Miss.Model)
+plot(Conductivity.Miss.Model) 
+Resid.Conductivity.Miss <- residuals(Conductivity.Miss.Model, type="response")
+hist(Resid.Conductivity.Miss)
+
+TP.Miss.Model <- glm(TP ~ DO+Week+Site+Secchi, data = Missaquash)  
+summary(TP.Miss.Model)
+plot(TP.Miss.Model) 
+Resid.TP.Miss <- residuals(TP.Miss.Model, type="response")
+hist(Resid.TP.Miss)
+
+TN.Miss.Model <- glm(TN ~ DO+Week+pH+Age, data = Missaquash)  
+summary(TN.Miss.Model)
+plot(TN.Miss.Model) 
+Resid.TN.Miss <- residuals(TN.Miss.Model, type="response")
+hist(Resid.TN.Miss)
+
+options(na.action="na.omit")
+
+?glm
+```
+

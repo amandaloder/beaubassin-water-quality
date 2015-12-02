@@ -1,0 +1,57 @@
+Quebec Data 
+========================================================
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+Quebec.Data <- read.csv("data/Quebec.Data.csv", na.strings="NI", stringsAsFactors = FALSE)
+Beaubassin.Data$Age <- as.character(Beaubassin.Data$Age)
+class(Quebec.Data$TP)
+
+Quebec.New <- subset(Quebec.Data, Age == "New")
+Quebec.Old <- subset(Quebec.Data, Age == "Old")
+Scatter.TP.New <- ggplot(Quebec.New, aes(x=Site, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("TP") 
+Scatter.TP.New
+Scatter.TP.Old <- ggplot(Quebec.Old, aes(x=Site, y=TP), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("TP") 
+Scatter.TP.Old
+Scatter.TN.New <- ggplot(Quebec.New, aes(x=Site, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("TP") 
+Scatter.TN.New
+Scatter.TN.Old <- ggplot(Quebec.Old, aes(x=Site, y=TN), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("TP") 
+Scatter.TN.Old
+Scatter.Ca <- ggplot(Quebec.Data, aes(x=Site, y=Ca), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("Ca") 
+Scatter.Ca
+Scatter.S <- ggplot(Quebec.Data, aes(x=Site, y=S), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("S") 
+Scatter.S
+Scatter.Na <- ggplot(Quebec.Data, aes(x=Site, y=Na), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("Na") 
+Scatter.Na
+Scatter.Cl. <- ggplot(Quebec.Data, aes(x=Site, y=Cl.), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("Cl-") 
+Scatter.Cl.
+Scatter.K <- ggplot(Quebec.Data, aes(x=Site, y=K), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("K") 
+Scatter.K
+Scatter.K <- ggplot(Quebec.Data, aes(x=Site, y=K), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("K") 
+Scatter.K
+Scatter.Si <- ggplot(Quebec.Data, aes(x=Site, y=Si), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("Si") 
+Scatter.Si
+Scatter.Mg <- ggplot(Quebec.Data, aes(x=Site, y=Mg), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("Mg") 
+Scatter.Mg
+Scatter.COD <- ggplot(Quebec.Data, aes(x=Site, y=COD), na.rm=TRUE) + geom_point(na.rm=TRUE, size=4) +xlab("Site") + ylab("COD") 
+Scatter.COD
+
+```
+
+Appendices 
+
+```{r}
+Quebec.Data.Appendix <- read.csv("~/Documents/Master's/Data/Quebec.Data.Appendix.csv", na.strings="NI", stringsAsFactors = FALSE)
+Quebec.appendix.1 <- select(Quebec.Data.Appendix, Site, pH, COD, TNdiss, CIT., NH4., TP, TN, Cl., SO42., NO3., NO3..1)
+Quebec.appendix.1 
+Quebec.appendix.2 <- select(Quebec.Data.Appendix, Site, Al, Ca, Fe, K, Mg, Mn, Na, P, S, Si, Sr)
+Quebec.appendix.2 
+
+```
+
