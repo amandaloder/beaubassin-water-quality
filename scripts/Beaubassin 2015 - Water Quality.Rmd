@@ -13,9 +13,9 @@ library(gridExtra)
 #na.strings="" used to replace blank entry with NA
 #stringAsFactors --> strings in data are converted to factors
 #factor --> whole numbers (integers)
-Beaubassin.Data <- read.csv("~/Documents/Master's/Data/Loder R data water quality 2015.csv", na.strings="NI", stringsAsFactors = FALSE)
-Groundwater.Beaubassin <- read.csv("~/Documents/Master's/Data/CMR Groundwater Survey 2015.csv", na.strings="ND", stringsAsFactors = FALSE)
-Weather.Data <- read.csv("~/Documents/Master's/Data/2015 Weather.csv", na.strings="NI", stringsAsFactors = FALSE)
+Beaubassin.Data <- read.csv("data/Loder R data water quality 2015.csv", na.strings="NI", stringsAsFactors = FALSE)
+Groundwater.Beaubassin <- read.csv("data/CMR Groundwater Survey 2015.csv", na.strings="ND", stringsAsFactors = FALSE)
+Weather.Data <- read.csv("data/2015 Weather.csv", na.strings="NI", stringsAsFactors = FALSE)
 Weather.Data <- select(Weather.Data, -Notes)
 Beaubassin.Data$TN[Beaubassin.Data$TN == "ND"] <- "0"
 Beaubassin.Data$TN[Beaubassin.Data$TN == "<0.5"] <- "0"
